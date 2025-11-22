@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Brandy Dispatch Panel</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f3f4f6;
+      color: #222;
+    }
+
+    header {
+      background: #111827;
+      color: #f9fafb;
+      padding: 16px 24px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .layout {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .panel {
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.08);
+      flex: 1 1 320px;
+      max-width: 600px;
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 18px;
+    }
+
+    label {
+      display: block;
+      margin-top: 8px;
+      margin-bottom: 4px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    button {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: none;
+      background: #2563eb;
+      color: #ffffff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    .hint {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    th {
+      text-align: left;
+      background: #f9fafb;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Brandy Dispatch Panel</h1>
+    <p class="subtitle">Mini field-dispatch system for medics & drivers</p>
+  </header>
+
+  <main class="layout">
+    <section class="panel">
+      <h2>New Dispatch</h2>
+
+      <label for="driverPhone">Driver phone number</label>
+      <input id="driverPhone" type="text" placeholder="+1 780 555 1234" />
+
+      <label for="driverName">Driver name</label>
+      <input id="driverName" type="text" placeholder="e.g. John / Truck 23" />
+
+      <label for="jobLocation">Location / LSD / Site</label>
+      <input id="jobLocation" type="text"
+             placeholder="12-34-056-07W6, Fox Creek, etc." />
+
+      <label for="jobDetails">Job details</label>
+      <textarea id="jobDetails"
+        placeholder="Standby, transfer, H2S location, notes…"></textarea>
+
+      <button id="sendBtn">Send Dispatch (test)</button>
+      <p class="hint">
+        Right now this just simulates sending. We’ll hook it to real SMS next.
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>Active Jobs</h2>
+      <table id="jobsTable">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Driver</th>
+            <th>Location</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- rows added by JS -->
+        </tbody>
+      </table>
+      <p class="hint">
+        Every time you click “Send Dispatch”, the job will appear in this list.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const jobs = [];
+
+    function renderJobs() {
+      const tbody = document.querySelector("#jobsTable tbody");
+      tbody.innerHTML = "";
+
+      jobs.forEach(job => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${job.time}</td>
+          <td>${job.driver}</td>
+          <td>${job.location}</td>
+          <td>${job.status}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById("sendBtn").addEventListener("click", () => {
+      const phone = document.getElementById("driverPhone").value.trim();
+      const driverName = document.getElementById("driverName").value.trim();
+      const location = document.getElementById("jobLocation").value.trim();
+      const details = document.getElementById("jobDetails").value.trim();
+
+      if (!phone || !location) {
+        alert("Driver phone and location are required.");
+        return;
+      }
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+      const job = {
+        time: timeStr,
+        driver: driverName || phone,
+        location,
+        details,
+        status: "Sent (test)"
+      };
+
+      jobs.unshift(job);
+      renderJobs();
+
+      alert(
+        "TEST ONLY:\n\nThis is where an SMS would be sent to:\n" +
+        `${job.driver} (${phone})\n\n` +
+        `Location: ${location}\nDetails: ${details}`
+      );
+
+      document.getElementById("jobDetails").value = "";
+    });
+  </script>
+</body>
+</html>
